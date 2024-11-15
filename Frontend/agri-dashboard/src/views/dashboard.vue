@@ -100,8 +100,62 @@
   </div>
   <div class="card result-card">
     <div class="card-header">
-              实时检测面板（校准后）
+              实时监测面板（校准后）
     </div>
+          <div class="card-body">
+        <div class="row">
+          <!-- 左侧4列宽度部分 -->
+          <div class="col-md-4">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover data-table">
+              <thead class="thead-dark">
+                <tr>
+                  <th>深度</th>
+                  <th>水分</th>
+                  <th>水势</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in depthData" :key="index">
+                  <td class="first-column">{{ row.depth }}</td>
+                  <td>{{ row.moisture }}</td>
+                  <td>{{ row.tension }}</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+
+          </div>
+          
+          <!-- 右侧8列宽度的表格部分 -->
+          <div class="col-md-8">
+            <table class="sensor-table">
+              <colgroup>
+            <col style="width: 95px;">
+            <col style="width: 95px;">
+            <col style="width: 95px;">
+            <col style="width: 50px;"> <!-- 深度列宽度设置为50px -->
+          </colgroup>
+          <thead>
+            <tr>
+              <th>温度</th>
+              <th>PH</th>
+              <th>EC</th>
+              <th>深度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in sensorData" :key="index">
+              <td><GaugeChart :value="row.temperature" /></td>
+              <td><GaugeChart :value="row.ph" /></td>
+              <td><GaugeChart :value="row.ec" /></td>
+              <td class="depth-column">{{ row.depth }}</td>
+            </tr>
+          </tbody>
+        </table>
+          </div>
+        </div>
+      </div>
     <div class="card-body p-0"> </div>
   </div>
 
@@ -185,7 +239,9 @@
     <div class="card-header">
               历史数据
     </div>
-    <div class="card-body p-0"> </div>
+    <div class="card-body"> 
+    <SmoothLineChart :seriesData="allSeriesData" :xAxisData="xAxisData" />
+    </div>
   </div>
     </div>
     <div class="col-12 col-md-4"> <!-- 左侧偏移4个宽度，使其与地图对齐 -->
@@ -197,11 +253,13 @@
        <table class="table table-striped table-hover custom-table">
          <thead class="thead-dark">
            <tr>
-               <th>#</th>
-             <th>Name</th>
-             <th>Price</th>
-             <th>Hash</th>
-             <th>Certification</th>
+               <th>序号</th>
+             <th>传感器名称</th>
+             <th>传感器编号</th>
+             <th>传感器类型</th>
+             <th>工作状态</th>
+             <th>生产场景</th>
+             <th>采样间隔</th>
            </tr>
          </thead>
          <tbody>
@@ -211,6 +269,8 @@
              <td>{{ item.price }}</td>
              <td>{{ item.hash }}</td>
              <td>{{ item.cert }}</td>
+             <td>{{ item.name }}</td>
+             <td>{{ item.price }}</td>
            </tr>
          </tbody>
        </table>
@@ -277,10 +337,14 @@
 import HeaderBar from '@/components/HeaderBar.vue';
 import { toLonLat } from 'ol/proj';
 import apiService from '@/services/apiService';
+import GaugeChart from '../components/GaugeChart.vue';
+import SmoothLineChart from '../components/SmoothLineChart.vue';
   export default {
     name: 'DashboardPage',
     components: {
       HeaderBar, // 注册标题栏组件
+      GaugeChart,
+      SmoothLineChart
     },
     data() {
       return {
@@ -293,6 +357,55 @@ import apiService from '@/services/apiService';
       detectionAlgorithms: ['SensorFormer', '算法B'],
       startTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '', 
       endTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '' ,
+      xAxisData: Array.from({ length: 24 }, (_, i) => i), // 时间（小时）
+      allSeriesData: [
+        {
+          name: '水分',
+          data: [0.2, 0.4, 0.6, 0.8, 1, 0.7, 0.5, 0.3, 0.4, 0.6, 0.7, 0.5, 0.6, 0.8, 1, 0.9, 0.6, 0.4, 0.3, 0.2, 0.5, 0.6, 0.7, 0.8],
+          yAxisIndex: 0,
+          lineStyle: { color: 'blue' }
+        },
+        {
+          name: '水势',
+          data: [0.4, 0.3, 0.5, 0.6, 0.7, 0.5, 0.4, 0.3, 0.4, 0.5, 0.6, 0.7, 0.6, 0.5, 0.4, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.6, 0.5, 0.4],
+          yAxisIndex: 1,
+          lineStyle: { color: 'green', type: 'dashed' }
+        },
+        {
+          name: '温度',
+          data: [0.5, 0.6, 0.7, 0.6, 0.5, 0.7, 0.8, 0.6, 0.7, 0.6, 0.5, 0.8, 0.7, 0.6, 0.5, 0.7, 0.6, 0.5, 0.7, 0.8, 0.6, 0.7, 0.8, 0.6],
+          yAxisIndex: 0,
+          lineStyle: { color: 'red' }
+        },
+        {
+          name: 'PH',
+          data: [0.3, 0.4, 0.6, 0.5, 0.7, 0.4, 0.3, 0.6, 0.5, 0.4, 0.7, 0.5, 0.4, 0.6, 0.7, 0.5, 0.6, 0.4, 0.3, 0.6, 0.7, 0.4, 0.5, 0.6],
+          yAxisIndex: 1,
+          lineStyle: { color: 'orange' }
+        },
+        {
+          name: 'EC',
+          data: [0.6, 0.7, 0.8, 0.7, 0.5, 0.6, 0.4, 0.7, 0.5, 0.6, 0.7, 0.8, 0.6, 0.5, 0.4, 0.7, 0.8, 0.6, 0.7, 0.5, 0.8, 0.6, 0.5, 0.7],
+          yAxisIndex: 1,
+          lineStyle: { color: 'purple' }
+        }
+      ],
+      sensorData: [
+        { depth: "-10cm", temperature: 27.4, ph: 7.1, ec: 1.5 },
+        { depth: "-20cm", temperature: 27.2, ph: 7.0, ec: 1.6 },
+        { depth: "-40cm", temperature: 27.5, ph: 7.2, ec: 1.4 }
+      ],
+      depthData: [
+        { depth: "地表", moisture: 0.472, tension: 0.472 },
+        { depth: "-5cm", moisture: 0.594, tension: 0.594 },
+        { depth: "-10cm", moisture: 0.585, tension: 0.585 },
+        { depth: "-15cm", moisture: 0.582, tension: 0.582 },
+        { depth: "-20cm", moisture: 0.588, tension: 0.588 },
+        { depth: "-25cm", moisture: 0.601, tension: 0.601 },
+        { depth: "-30cm", moisture: 0.615, tension: 0.615 },
+        { depth: "-35cm", moisture: 0.616, tension: 0.616 },
+        { depth: "-40cm", moisture: 0.63, tension: 0.63 }
+      ],
         logs: [
         { timestamp: '2024-10-10 12:23:25', event: '空气湿度含量过高，及时处理' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
@@ -358,6 +471,10 @@ import apiService from '@/services/apiService';
     }
   },
   computed: {
+        // 过滤出当前选中的数据
+        filteredSeriesData() {
+      return this.allSeriesData.filter(series => this.selectedSeries.includes(series.name));
+    },
     totalPages() {
     return Math.ceil(this.dataList.length / this.itemsPerPage);
   },
@@ -626,7 +743,7 @@ padding-top: 0px;
  text-align: center;
  border: none;
  padding: 8px; /* 缩小内边距 */
- font-size: 14px; /* 缩小文字大小 */
+ font-size: 10px; /* 缩小文字大小 */
 }
 
 .custom-table tbody {
@@ -739,7 +856,7 @@ padding-top: 0px;
     padding-left: 0px;
     margin-right: 0px;
     display: flex;
-  height: 40vh;
+  height: 42vh;
 }
 .history-card{
   background-color: rgba(41, 41, 41, 0.7);
@@ -788,6 +905,84 @@ padding-top: 0px;
     color: #333;
     padding-top: 10px; /* Add padding to avoid overlap with close button */
   }
+  .data-table {
+   margin: 0; /* 移除表格的外边距 */
+ border-spacing: 0; /* 移除单元格之间的空隙 */
+ border-collapse: collapse; /* 合并边框，使其更紧凑 */
+ border-radius: 12px;
+ overflow: hidden;
+ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+ 
+}
+
+.data-table thead th {
+ background-color: rgba(52, 58, 64, 0.8); /* 半透明黑色背景 */
+ color: #ffffff;
+ font-weight: bold;
+ text-align: center;
+ border: none;
+ padding: 8px; /* 缩小内边距 */
+ font-size: 10px; /* 缩小文字大小 */
+}
+
+.data-table tbody {
+ background-color: rgba(255, 255, 255, 0.8); /* 半透明白色背景 */
+}
+
+.data-table td, .data-table th {
+  padding: 8px; /* 缩小内边距 */
+  font-size: 10px; /* 缩小文字大小 */
+ vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+ background-color: rgba(0, 106, 255, 0.8); /* 半透明 hover 效果 */
+}
+/* 设置表格第一列为黑底白字 */
+.data-table .first-column {
+  background-color: rgba(22, 22, 22, 0.8); /* 半透明黑色背景 */
+ color: #ffffff;
+ font-weight: bold;
+ text-align: center;
+ border: none;
+ padding: 8px; /* 缩小内边距 */
+ font-size: 10px; /* 缩小文字大小 */
+}
+.sensor-table {
+  margin: 0; /* 移除表格的外边距 */
+ border-spacing: 0; /* 移除单元格之间的空隙 */
+ border-collapse: collapse; /* 合并边框，使其更紧凑 */
+ border-radius: 12px;
+ overflow: hidden;
+ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+ width: 100%;
+ table-layout: fixed; /* 固定表格布局 */
+}
+.sensor-table tbody{
+  background-color: rgba(47, 47, 47, 0.8); /* 半透明白色背景 */
+}
+.sensor-table th{
+  background-color: rgba(52, 58, 64, 0.8); /* 半透明黑色背景 */
+ color: #ffffff;
+ font-weight: bold;
+ text-align: center;
+ border: none;
+ padding: 8px; /* 缩小内边距 */
+ font-size: 10px; /* 缩小文字大小 */
+}
+.sensor-table td {
+  padding: 8px;
+  border: 1px solid #3c3c3c;
+  width: 95px; /* 设置单元格宽度 */
+  height: 80px; /* 设置单元格高度 */
+}
+.depth-column {
+  background-color: #666666;
+  color: #fff;
+  width: 50px;
+  font-size: small;
+}
+
   </style>
   
   
