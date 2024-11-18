@@ -4,7 +4,7 @@
         <span>{{ formattedDateTime }}</span>
       </div>
       <div class="header-center">
-        <h1>土壤传感器的时序类数据优化</h1>
+        <h1>{{title}}</h1>
       </div>
       <div class="header-right">
         <span>欢迎您 {{ username }}</span>
@@ -18,6 +18,12 @@
   <script>
   export default {
     name: 'HeaderBar',
+    props: {
+    title: {
+      type: String,
+      required: true
+    }
+  },
     data() {
       return {
         formattedDateTime: '',

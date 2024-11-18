@@ -1,15 +1,110 @@
 <template>
     <div id="app">
-      <HeaderBar></HeaderBar>
+      <HeaderBar title="有害气体浓度类传感器数据优化"></HeaderBar>
       <div class="container-fluid">
         <div class="row ">
-        <div class="col-12 col-md-4"></div>
+        <div class="col-12 col-md-4">
+          <div class="card selection-card">
+    <div class="card-header">选择面板</div>
+    <div class="card-body">
+      <form>
+        <div class="row mb-2">
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">生产厂家</span>
+              <select v-model="selectedManufaturer" id="manufacturer" class="form-select form-select-sm">
+                <option v-for="(manufacturer, index) in manufacturers" :key="index" :value="manufacturer">
+                  {{ manufacturer }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">传感器类型</span>
+              <select v-model="selectedDeviceType" id="deviceType" class="form-select form-select-sm">
+                <option v-for="(type, index) in deviceTypes" :key="index" :value="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">传感器编号</span>
+              <select v-model="selectedModel" id="model" class="form-select form-select-sm">
+                <option v-for="(model, index) in models" :key="index" :value="model">
+                  {{ model }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">开始时间</span>
+              <input
+                type="datetime-local"
+                id="startTime"
+                class="form-control form-control-sm"
+                v-model="startTime"
+                @focus="removePlaceholder('startTime')"
+                @blur="addPlaceholder('startTime', '请选择开始时间')"
+              >
+            </div>
+          </div>
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">结束时间</span>
+              <input
+                type="datetime-local"
+                id="endTime"
+                class="form-control form-control-sm"
+                v-model="endTime"
+                @focus="removePlaceholder('endTime')"
+                @blur="addPlaceholder('endTime', '请选择结束时间')"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">优化算法</span>
+              <select v-model="selectedOptimizationAlgorithm" id="optimization" class="form-select form-select-sm">
+                <option v-for="(algo, index) in optimizationAlgorithms" :key="index" :value="algo">
+                  {{ algo }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">校准算法</span>
+              <select v-model="selectedCalibrationAlgorithm" id="algorithm" class="form-select form-select-sm">
+                <option v-for="(algo, index) in calibrationAlgorithms" :key="index" :value="algo">
+                  {{ algo }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-light btn-sm w-100">提交</button> <!-- 设置 w-100 使按钮充满宽度 -->
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+        </div>
 
         <div class="col-12 col-md-6">
           <!-- 将地图放入 card 中，去掉 header，只显示地图 -->
           <div class="card custom-card">
             <div class="card-header">
-              土壤传感器地图分布
+              气体传感器分布地图
             </div>
             <div class="card-body p-0"> <!-- 去掉卡片内边距 -->
               <div id="map" ref="map" style="width: 100%; height: 60vh;"></div> <!-- 设置地图的高度 -->
@@ -17,9 +112,18 @@
           </div>
         </div>
         <div class="col-12 col-md-2">
+          <div class="card gas-info-card">
+      <div class="card-header">氨气浓度排名</div>
+      <div class="card-body p-0">
+                  <div v-for="(item, index) in AnGas" :key="index" class="info-item">
+                    <label>TOP {{index+1}}:</label>
+                    <span>{{ item.name }}</span>
+                  </div>
+          </div>
+    </div>
           <div class="card info-card">
     <div class="card-header">当前位置</div>
-    <div class="card-body">
+    <div class="card-body p-0">
       <div class="info-item">
         <label>经度：</label>
         <span>{{ clickedCoords.lon }}</span>
@@ -38,40 +142,12 @@
       </div>
     </div>
   </div>
-  <div class="card soil-info-card">
-      <div class="card-header">土质信息</div>
-      <div class="card-body">
-                  <div class="info-item">
-                    <label>土壤类型：</label>
-                    <span>黑土</span>
-                  </div>
-                  <div class="info-item">
-                    <label>质地：</label>
-                    <span>壤土或粘壤土</span>
-                  </div>
-                  <div class="info-item">
-                    <label>结构：</label>
-                    <span>团粒结构</span>
-                  </div>
-                  <div class="info-item">
-                    <label>有机质含量：</label>
-                    <span>高达10%以上</span>
-                  </div>
-                  <div class="info-item">
-                    <label>pH值：</label>
-                    <span>在6.0到7.5之间</span>
-                  </div>
-                  <div class="info-item">
-                    <label>养分含量：</label>
-                    <span>富含磷、氮、钾等</span>
-                  </div>
-                  <div class="info-item">
-                    <label>保水性：</label>
-                    <span>强</span>
-                  </div>
-                  <div class="info-item">
-                    <label>环境影响：</label>
-                    <span>易受到水蚀和风蚀</span>
+  <div class="card gas-info-card">
+      <div class="card-header">当前场景气体浓度排名</div>
+      <div class="card-body p-0">
+                  <div v-for="(item, index) in TopGasCurrent" :key="index" class="info-item">
+                    <label>TOP {{index+1}}:</label>
+                    <span>{{ item.name }}</span>
                   </div>
           </div>
     </div>
@@ -81,17 +157,19 @@
     <div class="col-12 col-md-4 offset-md-4"> <!-- 左侧偏移4个宽度，使其与地图对齐 -->
       <div class="card equipdetail-card">
         <div class="card-header">设备使用详情</div>
-        <div class="card-body">
+        <div class="card-body p-0">
           <!-- 在这里添加内容 -->
           <div class="table-responsive">
-       <table class="table table-striped table-hover custom-table">
+       <table class="table table-striped  table-hover custom-table">
          <thead class="thead-dark">
            <tr>
-               <th>#</th>
-             <th>Name</th>
-             <th>Price</th>
-             <th>Hash</th>
-             <th>Certification</th>
+               <th>序号</th>
+             <th>传感器名称</th>
+             <th>传感器编号</th>
+             <th>传感器类型</th>
+             <th>工作状态</th>
+             <th>生产场景</th>
+             <th>采样间隔</th>
            </tr>
          </thead>
          <tbody>
@@ -101,6 +179,8 @@
              <td>{{ item.price }}</td>
              <td>{{ item.hash }}</td>
              <td>{{ item.cert }}</td>
+             <td>{{ item.name }}</td>
+             <td>{{ item.price }}</td>
            </tr>
          </tbody>
        </table>
@@ -168,7 +248,7 @@ import HeaderBar from '@/components/HeaderBar.vue';
 import { toLonLat } from 'ol/proj';
 import apiService from '@/services/apiService';
   export default {
-    name: 'DashboardPage',
+    name: 'GasPage',
     components: {
       HeaderBar, // 注册标题栏组件
     },
@@ -176,6 +256,18 @@ import apiService from '@/services/apiService';
       return {
         map: null,
         overlay: null,
+        manufacturers: ['所有厂家', '厂家1', '厂家2'],
+      deviceTypes: ['所有类型', '类型1', '类型2'],
+      models: ['SF001', 'SF002'],
+      optimizationAlgorithms: ['所有算法', '算法1', '算法2'],
+      calibrationAlgorithms: ['SensorFormer', '算法B'],
+      selectedManufaturer:'所有厂家',
+      selectedDeviceType:'所有类型',
+      selectedModel:'SF001',
+      selectedOptimizationAlgorithm:'所有算法',
+      selectedCalibrationAlgorithm:'算法B',
+      startTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '', 
+      endTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '' ,
         logs: [
         { timestamp: '2024-10-10 12:23:25', event: '空气湿度含量过高，及时处理' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
@@ -188,10 +280,24 @@ import apiService from '@/services/apiService';
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
         // 可以添加更多的日志条目
       ],
+        AnGas:[
+        {name:'武汉养鸡场'},
+          {name:'合肥养鸡场'},
+          {name:'菏泽养鸡场'},
+          {name:'廊坊养鸡场'},
+          {name:'大庆养鸡场'}
+        ],
+        TopGasCurrent:[
+          {name:'甲烷'},
+          {name:'PM10'},
+          {name:'硫化氢'}
+        ],
         points: [
-          { id: 1, name: 'Point 1', coords: [116.4074, 39.9042], description: 'This is Point 1 in Beijing.' },
-          { id: 2, name: 'Point 2', coords: [-0.1276, 51.5074], description: 'This is Point 2 in London.' },
-          { id: 3, name: 'Point 3', coords: [139.6917, 35.6895], description: 'This is Point 3 in Tokyo.' },
+          { id: 1, name: '廊坊养鸡场', coords: [116.6838, 39.5296], description: '廊坊养鸡场' },
+          { id: 2, name: '武汉养鸡场', coords: [114.3054, 30.5931], description: '武汉养鸡场' },
+          { id: 3, name: '菏泽养鸡场', coords: [115.4812, 35.2336], description: '菏泽养鸡场' },
+          { id: 4, name: '大庆养鸡场', coords: [125.1031, 46.5876], description: '大庆养鸡场' },
+          { id: 5, name: '合肥养鸡场', coords: [117.2290, 31.8206], description: '合肥养鸡场' }
         ],
         initialCenter: null,
         clickedCoords: {
@@ -266,6 +372,15 @@ import apiService from '@/services/apiService';
   }
     },
     methods: {
+      getFormattedDate(date) {
+      // 格式化日期为 YYYY-MM-DDTHH:MM 格式
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    },
       goToPage(page) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -336,7 +451,7 @@ import apiService from '@/services/apiService';
           });
           vectorSource.addFeature(feature);
         });
-  
+
         // Add click event to display point details
         this.map.on('singleclick', (event) => {
           this.overlay.setPosition(undefined); // Hide any open popup
@@ -357,7 +472,7 @@ import apiService from '@/services/apiService';
       pointStyle(feature) {
         return new Style({
           image: new Icon({
-            src: 'https://openlayers.org/en/v6.5.0/examples/data/icon.png',
+            src: '/pics/yellowdot.png',
             scale: 0.5,
           }),
           text: new Text({
@@ -409,6 +524,46 @@ import apiService from '@/services/apiService';
 .equipdetail-card .card-body {
 padding-top: 0px;
 }
+ /* Popup styling */
+ .ol-popup {
+    position: absolute;
+    background-color:rgba(255, 255, 255, 0.7);
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+    white-space: nowrap;
+  }
+  
+  /* Close button styling */
+  .popup-close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    /*cursor: pointer;*/
+    color: white;
+  }
+  
+ /* .ol-popup::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color:none;
+  }*/
+  
+  .popup-content {
+    font-size: 14px;
+    color:#554100;
+    padding-top: 0px; /* Add padding to avoid overlap with close button */
+  }
   .warning-card{
     background-color: rgba(41, 41, 41, 0.7);
     margin-top: 40px;
@@ -416,7 +571,7 @@ padding-top: 0px;
     height: 25vh;
     border: none;
   }
-  .info-card, .soil-info-card {
+  .info-card, .gas-info-card {
     background-color: rgba(107, 107, 107, 0.2);
     color: #fff;
     border: none;
@@ -463,7 +618,7 @@ padding-top: 0px;
     margin-bottom: 10px; /* 增加底部间距 */
   }
   
-  .soil-info-card {
+  .gas-info-card {
     flex: 1;
   }
   .table-responsive {
@@ -485,7 +640,7 @@ padding-top: 0px;
  text-align: center;
  border: none;
  padding: 8px; /* 缩小内边距 */
- font-size: 14px; /* 缩小文字大小 */
+ font-size: 10px; /* 缩小文字大小 */
 }
 
 .custom-table tbody {
@@ -496,18 +651,21 @@ padding-top: 0px;
   padding: 8px; /* 缩小内边距 */
   font-size: 14px; /* 缩小文字大小 */
  vertical-align: middle;
+ background-color: rgba(40, 40, 40, 0.8); /* 半透明白色背景 */
+border: none;
+ color: #ffc400;
 }
 
 .custom-table tbody tr:hover {
- background-color: rgba(241, 241, 241, 0.8); /* 半透明 hover 效果 */
+ background-color: rgba(0, 106, 255, 0.8); /* 半透明 hover 效果 */
 }
 
 .pagination .page-link {
   padding: 5px 10px; /* 调整按钮内边距 */
   font-size: 14px; /* 缩小文字大小 */
-  color: #000;
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
+  color: #ffffff;
+  background-color: rgba(21, 21, 21, 0.8); 
+  border-color: #4c4c4c;
 }
 
 .pagination .page-item {
@@ -515,9 +673,9 @@ padding-top: 0px;
 }
 
 .pagination .page-item.active .page-link {
-  background-color: #007bff; /* 激活状态背景色 */
-  color: #fff;
-  border-color: #007bff;
+  background-color:#ffc400; /* 激活状态背景色 */
+  color: #020202;
+  border-color: #f5d56b;
 }
 
 .pagination .page-item.disabled .page-link {
@@ -525,9 +683,9 @@ padding-top: 0px;
 }
 
 .pagination .page-link:hover {
-  background-color: #000; /* 悬停时背景色 */
+  background-color: #007bff; /* 悬停时背景色 */
   color: #fff;
-  border-color: #000;
+  border-color: #58a9ff;
 }
 
 .log-panel {
@@ -539,19 +697,72 @@ padding-top: 0px;
   overflow-y: auto; /* 启用垂直滚动条 */
   font-family: monospace;
 }
+.log-panel::-webkit-scrollbar {
+  width: 8px;
+}
 
+.log-panel::-webkit-scrollbar-thumb {
+  background-color: #a0a0a0; /* 滚动条滑块颜色 */
+  border-radius: 4px; /* 圆角 */
+}
+
+.log-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #ccae00; /* 鼠标悬停时变为金黄色 */
+}
+
+.log-panel::-webkit-scrollbar-track {
+  background-color: #343434; /* 滚动条轨道背景色 */
+}
+.log-panel::-webkit-scrollbar-thumb {
+  transition: background-color 0.3s;
+}
 .log-entry {
   display: flex;
   justify-content: space-between;
   padding: 5px 0;
 }
-
 .timestamp {
   flex-shrink: 0;
 }
 
 .event {
   margin-left: 10px;
+}
+.selection-card {
+  background-color: rgba(107, 107, 107, 0.2);
+  color: white;
+  margin-top: 20px;
+  border: none;
+  /*max-width: 600px;*/
+  margin-right: 0px;
+  height: 20vh;
+}
+.selection-card .card-header {
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+}
+
+.input-group-text {
+  background-color: #333;
+  color: white;
+  padding: 4px 8px; /* 缩小标签的内边距 */
+  font-size: 12px; /* 缩小标签的字体大小 */
+}
+
+.form-select-sm, .form-control-sm {
+  font-size: 12px; /* 缩小选择框和输入框的字体大小 */
+  padding: 4px 8px; /* 缩小选择框和输入框的内边距 */
+  background-color: rgba(61, 61, 61, 0.7); 
+  color: #f3c429;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.col-12.col-md-4{
+  height: 60vh
 }
   </style>
   

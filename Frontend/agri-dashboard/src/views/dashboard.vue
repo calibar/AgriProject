@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-      <HeaderBar></HeaderBar>
+      <HeaderBar title="土壤传感器的时序类数据优化"></HeaderBar>
       <div class="container-fluid">
         <div class="row ">
         <div class="col-12 col-md-4">
@@ -12,7 +12,7 @@
           <div class="col">
             <div class="input-group input-group-sm">
               <span class="input-group-text">生产厂家</span>
-              <select id="manufacturer" class="form-select form-select-sm">
+              <select v-model="selectedManufaturer" id="manufacturer" class="form-select form-select-sm">
                 <option v-for="(manufacturer, index) in manufacturers" :key="index" :value="manufacturer">
                   {{ manufacturer }}
                 </option>
@@ -22,7 +22,7 @@
           <div class="col">
             <div class="input-group input-group-sm">
               <span class="input-group-text">传感器类型</span>
-              <select id="deviceType" class="form-select form-select-sm">
+              <select v-model="selectedDeviceType" id="deviceType" class="form-select form-select-sm">
                 <option v-for="(type, index) in deviceTypes" :key="index" :value="type">
                   {{ type }}
                 </option>
@@ -31,8 +31,8 @@
           </div>
           <div class="col">
             <div class="input-group input-group-sm">
-              <span class="input-group-text">传感器型号</span>
-              <select id="model" class="form-select form-select-sm">
+              <span class="input-group-text">传感器编号</span>
+              <select v-model="selectedModel" id="model" class="form-select form-select-sm">
                 <option v-for="(model, index) in models" :key="index" :value="model">
                   {{ model }}
                 </option>
@@ -74,7 +74,7 @@
           <div class="col">
             <div class="input-group input-group-sm">
               <span class="input-group-text">优化算法</span>
-              <select id="optimization" class="form-select form-select-sm">
+              <select v-model="selectedOptimizationAlgorithm" id="optimization" class="form-select form-select-sm">
                 <option v-for="(algo, index) in optimizationAlgorithms" :key="index" :value="algo">
                   {{ algo }}
                 </option>
@@ -83,9 +83,9 @@
           </div>
           <div class="col">
             <div class="input-group input-group-sm">
-              <span class="input-group-text">检测算法</span>
-              <select id="algorithm" class="form-select form-select-sm">
-                <option v-for="(algo, index) in detectionAlgorithms" :key="index" :value="algo">
+              <span class="input-group-text">反演算法</span>
+              <select v-model="selectedInversionAlgorithm" id="algorithm" class="form-select form-select-sm">
+                <option v-for="(algo, index) in inversionAlgorithms" :key="index" :value="algo">
                   {{ algo }}
                 </option>
               </select>
@@ -250,7 +250,7 @@
         <div class="card-body p-0">
           <!-- 在这里添加内容 -->
           <div class="table-responsive">
-       <table class="table table-striped table-hover custom-table">
+       <table class="table table-striped  table-hover custom-table">
          <thead class="thead-dark">
            <tr>
                <th>序号</th>
@@ -354,7 +354,12 @@ import SmoothLineChart from '../components/SmoothLineChart.vue';
       deviceTypes: ['所有类型', '类型1', '类型2'],
       models: ['SF001', 'SF002'],
       optimizationAlgorithms: ['所有算法', '算法1', '算法2'],
-      detectionAlgorithms: ['SensorFormer', '算法B'],
+      inversionAlgorithms: ['SensorFormer', '算法B'],
+      selectedManufaturer:'所有厂家',
+      selectedDeviceType:'所有类型',
+      selectedModel:'SF001',
+      selectedOptimizationAlgorithm:'所有算法',
+      selectedInversionAlgorithm:'SensorFormer',
       startTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '', 
       endTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '' ,
       xAxisData: Array.from({ length: 24 }, (_, i) => i), // 时间（小时）
@@ -754,6 +759,9 @@ padding-top: 0px;
   padding: 8px; /* 缩小内边距 */
   font-size: 14px; /* 缩小文字大小 */
  vertical-align: middle;
+ background-color: rgba(40, 40, 40, 0.8); /* 半透明白色背景 */
+border: none;
+ color: #ffc400;
 }
 
 .custom-table tbody tr:hover {
@@ -763,9 +771,9 @@ padding-top: 0px;
 .pagination .page-link {
   padding: 5px 10px; /* 调整按钮内边距 */
   font-size: 14px; /* 缩小文字大小 */
-  color: #000;
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
+  color: #ffffff;
+  background-color: rgba(21, 21, 21, 0.8); 
+  border-color: #4c4c4c;
 }
 
 .pagination .page-item {
@@ -773,9 +781,9 @@ padding-top: 0px;
 }
 
 .pagination .page-item.active .page-link {
-  background-color: #007bff; /* 激活状态背景色 */
-  color: #fff;
-  border-color: #007bff;
+  background-color:#ffc400; /* 激活状态背景色 */
+  color: #020202;
+  border-color: #f5d56b;
 }
 
 .pagination .page-item.disabled .page-link {
@@ -783,9 +791,9 @@ padding-top: 0px;
 }
 
 .pagination .page-link:hover {
-  background-color: #000; /* 悬停时背景色 */
+  background-color: #007bff; /* 悬停时背景色 */
   color: #fff;
-  border-color: #000;
+  border-color: #58a9ff;
 }
 
 .log-panel {
@@ -797,7 +805,25 @@ padding-top: 0px;
   overflow-y: auto; /* 启用垂直滚动条 */
   font-family: monospace;
 }
+.log-panel::-webkit-scrollbar {
+  width: 8px;
+}
 
+.log-panel::-webkit-scrollbar-thumb {
+  background-color: #a0a0a0; /* 滚动条滑块颜色 */
+  border-radius: 4px; /* 圆角 */
+}
+
+.log-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #ccae00; /* 鼠标悬停时变为金黄色 */
+}
+
+.log-panel::-webkit-scrollbar-track {
+  background-color: #343434; /* 滚动条轨道背景色 */
+}
+.log-panel::-webkit-scrollbar-thumb {
+  transition: background-color 0.3s;
+}
 .log-entry {
   display: flex;
   justify-content: space-between;
@@ -869,10 +895,10 @@ padding-top: 0px;
   /* Popup styling */
   .ol-popup {
     position: absolute;
-    background-color: white;
+    background-color:rgba(41, 41, 41, 0.7);
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: none;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
     min-width: 100px;
     white-space: nowrap;
@@ -886,10 +912,11 @@ padding-top: 0px;
     background: transparent;
     border: none;
     font-size: 16px;
-    cursor: pointer;
+    /*cursor: pointer;*/
+    color: white;
   }
   
-  .ol-popup::after {
+ /* .ol-popup::after {
     content: '';
     position: absolute;
     bottom: -10px;
@@ -897,13 +924,13 @@ padding-top: 0px;
     margin-left: -10px;
     border-width: 10px;
     border-style: solid;
-    border-color: white transparent transparent transparent;
-  }
+    border-color:none;
+  }*/
   
   .popup-content {
     font-size: 14px;
-    color: #333;
-    padding-top: 10px; /* Add padding to avoid overlap with close button */
+    color:#ffc400;
+    padding-top: 0px; /* Add padding to avoid overlap with close button */
   }
   .data-table {
    margin: 0; /* 移除表格的外边距 */
@@ -922,7 +949,7 @@ padding-top: 0px;
  text-align: center;
  border: none;
  padding: 8px; /* 缩小内边距 */
- font-size: 10px; /* 缩小文字大小 */
+ font-size: 11px; /* 缩小文字大小 */
 }
 
 .data-table tbody {
@@ -933,6 +960,9 @@ padding-top: 0px;
   padding: 8px; /* 缩小内边距 */
   font-size: 10px; /* 缩小文字大小 */
  vertical-align: middle;
+ background-color: rgba(40, 40, 40, 0.8); /* 半透明白色背景 */
+ color: #f3c429;
+ border: none;
 }
 
 .data-table tbody tr:hover {
@@ -946,7 +976,7 @@ padding-top: 0px;
  text-align: center;
  border: none;
  padding: 8px; /* 缩小内边距 */
- font-size: 10px; /* 缩小文字大小 */
+ font-size: 10.8px; /* 缩小文字大小 */
 }
 .sensor-table {
   margin: 0; /* 移除表格的外边距 */

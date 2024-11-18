@@ -94,7 +94,7 @@ export default {
           sessionStorage.setItem('username',this.username)
           sessionStorage.setItem('token',this.username+"token")
           console.log('Login with:', this.username, this.password);
-          this.$router.push('/dashboard');
+          this.$router.push('/gas');
         }else{
           alert("wrong password")
         }
