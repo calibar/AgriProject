@@ -98,6 +98,50 @@
       </form>
     </div>
   </div>
+        <div class="card result-card">
+          <div class="card-header">
+            实时监测面板（校准后）
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover data-table">
+                <thead class="thead-dark">
+                <tr>
+                  <th></th>
+                  <th>湿度</th>
+                  <th>温度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align: left;font-size: 14px; color: #f3c429;font-weight: bold;">环境参数</td>
+                  <td><div id="humidity-chart" style="width: 11vh; height: 11vh;"></div></td>
+                  <td><div id="temperature-chart" style="width: 11vh; height: 11vh;"></div></td>
+                </tr>
+              </tbody>
+              </table>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover data-table">
+                <thead class="thead-dark">
+                <tr>
+                  <th style="text-align: left;font-size: 14px; color: #f3c429;font-weight: bold;">有害气体浓度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 0%;">
+                    <!-- 饼图 -->
+                    <div id="pie-chart" style="width: 100%; height: 20vh; margin: auto;"></div>
+                    <!-- 折线图 -->
+                    <div id="line-chart" style="width: 100%; height: 20vh; margin: auto; margin-top: 10px;"></div>
+                  </td>
+                </tr>
+              </tbody>
+              </table>
+            </div>
+            </div>
+        </div>
         </div>
 
         <div class="col-12 col-md-6">
@@ -247,6 +291,7 @@
 import HeaderBar from '@/components/HeaderBar.vue';
 import { toLonLat } from 'ol/proj';
 import apiService from '@/services/apiService';
+import * as echarts from "echarts";
   export default {
     name: 'GasPage',
     components: {
@@ -256,7 +301,11 @@ import apiService from '@/services/apiService';
       return {
         map: null,
         overlay: null,
-        manufacturers: ['所有厂家', '厂家1', '厂家2'],
+        envparam:{
+          moisture:'',
+          tension:'' 
+        },
+      manufacturers: ['所有厂家', '厂家1', '厂家2'],
       deviceTypes: ['所有类型', '类型1', '类型2'],
       models: ['SF001', 'SF002'],
       optimizationAlgorithms: ['所有算法', '算法1', '算法2'],
@@ -268,6 +317,56 @@ import apiService from '@/services/apiService';
       selectedCalibrationAlgorithm:'算法B',
       startTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '', 
       endTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '' ,
+            // 饼图数据
+            pieData: [
+        { value: 35, name: "气体" },
+        { value: 25, name: "碳化物" },
+        { value: 15, name: "甲烷" },
+        { value: 10, name: "氮化物" },
+        { value: 10, name: "PM10" },
+        { value: 5, name: "其他" },
+      ],
+      // 折线图数据
+      lineSeries: [
+        {
+          name: "气体",
+          type: "line",
+          data: [50, 60, 55, 70, 65, 80],
+          smooth: true,
+        },
+        {
+          name: "碳化物",
+          type: "line",
+          data: [40, 45, 50, 48, 55, 60],
+          smooth: true,
+        },
+        {
+          name: "甲烷",
+          type: "line",
+          data: [20, 25, 23, 30, 28, 35],
+          smooth: true,
+        },
+        {
+          name: "氮化物",
+          type: "line",
+          data: [10, 12, 15, 14, 18, 20],
+          smooth: true,
+        },
+        {
+          name: "PM10",
+          type: "line",
+          data: [30, 32, 35, 38, 40, 42],
+          smooth: true,
+        },
+        {
+          name: "其他",
+          type: "line",
+          data: [5, 6, 7, 6, 8, 10],
+          smooth: true,
+        },
+      ],
+      // 折线图的横轴数据
+      lineXAxisData: ["2019", "2020", "2021", "2022", "2023", "2024"],
         logs: [
         { timestamp: '2024-10-10 12:23:25', event: '空气湿度含量过高，及时处理' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
@@ -322,6 +421,10 @@ import apiService from '@/services/apiService';
         this.clickedCoords.lat = this.points[0].coords[1].toFixed(4);
         this.fetchLocationDetails(this.points[0].coords);
       } 
+      this.renderHumidityChart();
+      this.renderTemperatureChart();
+      this.renderPieChart();
+      this.renderLineChart();
     },
     async created() {
     try {
@@ -372,6 +475,204 @@ import apiService from '@/services/apiService';
   }
     },
     methods: {
+    // 饼图
+    renderPieChart() {
+      const chartDom = document.getElementById("pie-chart");
+      const myChart = echarts.init(chartDom);
+      const option = {
+        title: {
+          text: "污染物比例分布",
+          left: "center",
+          textStyle: {
+            fontSize: 14, // 调小标题文字
+            color: "#FFFFFF",
+          },
+        },
+        tooltip: {
+          trigger: "item",
+        },
+        legend: {
+          top: "bottom",
+          textStyle: {
+            fontSize: 8, // 调小图例字体
+            color: "#FFFFFF",
+          },
+        },
+        series: [
+          {
+            name: "污染物",
+            type: "pie",
+            radius: "50%",
+            data: this.pieData,
+            label: {
+              fontSize: 8, // 调小标签文字
+              color: "#FFFFFF",
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)",
+              },
+            },
+          },
+        ],
+      };
+      myChart.setOption(option);
+    },
+    // 折线图
+    renderLineChart() {
+      const chartDom = document.getElementById("line-chart");
+      const myChart = echarts.init(chartDom);
+      const option = {
+        title: {
+          text: "污染物趋势分析",
+          left: "center",
+          textStyle: {
+            fontSize: 15, // 调小标题文字
+            color: "#FFFFFF",
+          },
+        },
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          top: 20, // 图例距离顶部的距离
+          textStyle: {
+            fontSize: 8, // 调小图例字体
+            color: "#FFFFFF",
+          },
+          itemGap: 5,
+        },
+        grid: {
+          top: 50, // 调整图表内容距顶部的距离
+          bottom: 20, // 调整图表内容距底部的距离
+          left: 50,
+          right: 20,
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: this.lineXAxisData,
+          axisLabel: {
+            fontSize: 8, // 调小横轴标签
+            color: "#FFFFFF",
+          },
+        },
+        yAxis: {
+          type: "value",
+          axisLabel: {
+            fontSize: 8, // 调小纵轴标签
+            color: "#FFFFFF",
+          },
+        },
+        series: this.lineSeries,
+        color: ["#5470C6", "#91CC75", "#EE6666", "#FAC858", "#73C0DE", "#3BA272"],
+      };
+      myChart.setOption(option);
+    },
+    renderHumidityChart() {
+    const chartDom = document.getElementById("humidity-chart");
+    const myChart = echarts.init(chartDom);
+    const option = {
+      tooltip: {
+        formatter: "{a} <br/>{b} : {c}%",
+      },
+      series: [
+        {
+          name: "湿度",
+          type: "gauge",
+          radius: "90%",
+          splitNumber: 5, // 调整主刻度数量，减少刻度密度
+          axisLine: {
+            lineStyle: {
+              width: 10,
+              color: [[0.5, "#58D9F9"], [1, "#C12E34"]],
+            },
+          },
+          axisLabel: {
+            show:false
+          },
+          axisTick: {
+            splitNumber: 2, // 每两个主刻度间显示一个小刻度
+            length: 6, // 小刻度长度
+            lineStyle: {
+              color: "#FFFFFF",
+            },
+          },
+          splitLine: {
+            length: 10, // 主刻度分割线长度
+            lineStyle: {
+              color: "#FFFFFF",
+              width: 2,
+            },
+          },
+          pointer: {
+            width: 5,
+          },
+          detail: {
+            formatter: "{value}%",
+            fontSize: 14,
+            color: "#FFFFFF",
+          },
+          data: [{ value: 50}],
+        },
+      ],
+    };
+    myChart.setOption(option);
+  },
+  renderTemperatureChart() {
+    const chartDom = document.getElementById("temperature-chart");
+    const myChart = echarts.init(chartDom);
+    const option = {
+      tooltip: {
+        formatter: "{a} <br/>{b} : {c}°C",
+      },
+      series: [
+        {
+          name: "温度",
+          type: "gauge",
+          //startAngle: 180,
+          //endAngle: 0,
+          radius: "90%",
+          splitNumber: 5, // 调整主刻度数量
+          axisLine: {
+            lineStyle: {
+              width: 10,
+              color: [[0.3, "#FFAB91"], [1, "#FF5722"]],
+            },
+          },
+          axisLabel: {
+           show:false
+          },
+          axisTick: {
+            splitNumber: 2, // 每两个主刻度间显示一个小刻度
+            length: 6, // 小刻度长度
+            lineStyle: {
+              color: "#FFFFFF",
+            },
+          },
+          splitLine: {
+            length: 10, // 主刻度分割线长度
+            lineStyle: {
+              color: "#FFFFFF",
+              width: 2,
+            },
+          },
+          pointer: {
+            width: 5,
+          },
+          detail: {
+            formatter: "{value}°C",
+            fontSize: 14,
+            color: "#FFFFFF",
+          },
+          data: [{ value: 24.12 }],
+        },
+      ],
+    };
+    myChart.setOption(option);
+  },
       getFormattedDate(date) {
       // 格式化日期为 YYYY-MM-DDTHH:MM 格式
       const year = date.getFullYear();
@@ -763,6 +1064,59 @@ border: none;
 }
 .col-12.col-md-4{
   height: 60vh
+}
+.result-card{
+  background-color: rgba(41, 41, 41, 0.7);
+    color: #fff;
+    border: none;
+    margin-top: 20px;
+    padding-left: 0px;
+    margin-right: 0px;
+    display: flex;
+  height: 69vh;
+}
+.data-table {
+   margin: 0; /* 移除表格的外边距 */
+   margin-bottom: 0;
+ border-spacing: 0; /* 移除单元格之间的空隙 */
+ border-collapse: collapse; /* 合并边框，使其更紧凑 */
+ border-radius: 12px;
+ overflow: hidden;
+ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+ 
+}
+
+.data-table thead th {
+ background-color: rgba(52, 58, 64, 0.0); /* 半透明黑色背景 */
+ color: #ffffff;
+ font-weight: bold;
+ text-align: center;
+ border:#f0f0f0;
+ padding: 8px; /* 缩小内边距 */
+ font-size: 14px; /* 缩小文字大小 */
+}
+
+.data-table tbody {
+ background-color: rgba(255, 255, 255, 0); /* 半透明白色背景 */
+}
+
+.data-table td, .data-table th {
+  padding: 8px; /* 缩小内边距 */
+  font-size: 14px; /* 缩小文字大小 */
+ vertical-align: middle;
+ background-color: rgba(40, 40, 40, 0.0); /* 半透明白色背景 */
+ border: none;
+ text-align: center; /* 表头和表格内容居中 */
+ vertical-align: middle; /* 表格内容垂直居中 */
+}
+
+.data-table tbody tr:hover {
+ background-color: rgba(0, 106, 255, 0.0); /* 半透明 hover 效果 */
+}
+#humidity-chart,
+#temperature-chart {
+  display: inline-block; /* 确保 div 不影响表格对齐 */
+  vertical-align: bottom; /* 保证图表底部对齐 */
 }
   </style>
   
