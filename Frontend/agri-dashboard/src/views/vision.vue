@@ -102,8 +102,44 @@
           <div class="card-header">
             目标检测
           </div>
-          <div class="card-body">
+          <div class="card-body"> 
+            <div class="row">
+      <!-- 左侧竖排文字 -->
+      <div class="col-1">
+        <div class="vertical-text">
+          病 虫 害 检 测
+        </div>
+      </div>
+              <div class="col-11">
+                <div class="image-target">
+                  <img src="../assets/target.png" alt="描述图片内容" class="img-fluid">
+                </div>
+                <div class="result-section">
+                <div class="result-row">
+                    <span class="result-label">检测结果：</span>
+                    <span class="result-value">黄叶病</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">可信度：</span>
+                    <span class="result-value">78%</span>
+                </div>
+            </div>
+              </div>
+            </div> 
+            <div class="row">
+      <!-- 左侧竖排文字 -->
+      <div class="col-1">
+        <div class="vertical-text">
+          成 熟 度 检 测
+        </div>
+      </div>
+              <div class="col-11">
+                <div class="image-maturity">
+                  <img src="../assets/maturity.png" alt="描述图片内容" class="img-fluid">
+                </div>
 
+              </div>
+            </div>           
             </div>
         </div>
         </div>
@@ -115,7 +151,14 @@
               实时监测面板
             </div>
             <div class="card-body p-0"> <!-- 去掉卡片内边距 -->
-
+              <div class="image-grid">
+            <div class="image-item"><img src="../assets/s1.png" alt="Image 1"></div>
+            <div class="image-item"><img src="../assets/s2.png" alt="Image 2"></div>
+            <div class="image-item"><img src="../assets/s3.png" alt="Image 3"></div>
+            <div class="image-item"><img src="../assets/s4.png" alt="Image 4"></div>
+            <div class="image-item"><img src="../assets/s5.png" alt="Image 5"></div>
+            <div class="image-item"><img src="../assets/s6.png" alt="Image 6"></div>
+        </div>
             </div>
           </div>
         </div>
@@ -123,11 +166,20 @@
           <div class="card gas-info-card">
       <div class="card-header">增强效果</div>
       <div class="card-body p-0">
+          <!-- 添加的 Image Box -->
+  <div class="image-box">
+    <img src="../assets/augment.png" alt="描述图片内容" class="img-fluid">
+  </div>
           </div>
     </div>
-          <div class="card info-card">
+          <div class="card operation-card">
     <div class="card-header">用户操作记录</div>
-    <div class="card-body p-0">
+    <div class="card-body operation-panel">
+      <!-- 在这里添加内容 -->
+      <div v-for="(entry, index) in operations" :key="index" class="operation-entry">
+        <span class="timestamp">{{ entry.timestamp }}</span>
+        <span class="event">{{ entry.event }}</span>
+      </div>
     </div>
   </div>
         </div>
@@ -202,11 +254,6 @@
   </div>
       </div>
     </div>
-      <!-- Popup element -->
-      <div id="popup" ref="popup" class="ol-popup">
-        <button class="popup-close-button" @click="closePopup">×</button>
-        <div class="popup-content" ref="popupContent"></div>
-      </div>
     </div>
   </template>
   
@@ -250,6 +297,18 @@ import apiService from '@/services/apiService';
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
+        // 可以添加更多的日志条目
+      ],
+      operations:[
+      { timestamp: '2024-09-15 12:23:25', event: 'lmx登录了系统' },
+      { timestamp: '2024-10-10 12:23:25', event: 'admin登录了系统' },
+      { timestamp: '2024-10-12 12:23:25', event: 'lmx登出了系统' },
+        { timestamp: '2024-10-13 12:23:25', event: 'lmx登录了系统' },
+        { timestamp: '2024-10-18 12:23:25', event: 'admin登出了系统' },
+        { timestamp: '2024-10-21 12:23:25', event: 'admin登录了系统' },
+        { timestamp: '2024-11-10 12:23:25', event: 'lmx登录了系统' },
+        { timestamp: '2024-11-15 12:23:25', event: 'admin登出了系统' },
+        { timestamp: '2024-11-17 12:23:25', event: 'lmx登录了系统' },
         // 可以添加更多的日志条目
       ],
     dataList: [
@@ -331,10 +390,6 @@ import apiService from '@/services/apiService';
   prevPage() {
     if (this.currentPage > 1) this.currentPage--;
   },
-
-      closePopup() {
-        this.overlay.setPosition(undefined); // Hide the popup
-      },
     },
   };
   </script>
@@ -358,65 +413,34 @@ import apiService from '@/services/apiService';
   
   /* 设置地图容器的宽度和高度 */
   .custom-card {
-    background-color: rgba(119, 119, 119, 0.5);
+    background-color: rgba(55, 55, 55, 0.5);
     border: none;
     margin-top: 20px;
     height: 60vh; /* 设置高度 */
   }
   .equipdetail-card{
     background-color: rgba(41, 41, 41, 0.7);
-    margin-top: 40px;
+    margin-top: 15px;
     margin-left: 7px;
     height: 25vh;
+    width: 31.5vw;
     border: none;
   }
 .equipdetail-card .card-body {
 padding-top: 0px;
 }
- /* Popup styling */
- .ol-popup {
-    position: absolute;
-    background-color:rgba(255, 255, 255, 0.7);
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
-    min-width: 150px;
-    white-space: nowrap;
-  }
-  
-  /* Close button styling */
-  .popup-close-button {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: transparent;
-    border: none;
-    font-size: 16px;
-    /*cursor: pointer;*/
-    color: white;
-  }
-  
- /* .ol-popup::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color:none;
-  }*/
-  
-  .popup-content {
-    font-size: 14px;
-    color:#554100;
-    padding-top: 0px; /* Add padding to avoid overlap with close button */
-  }
   .warning-card{
     background-color: rgba(41, 41, 41, 0.7);
-    margin-top: 40px;
+    margin-top: 15px;
     margin-left: 7px;
+    height: 25vh;
+    width: 32.5vw;
+    border: none;
+  }
+  .operation-card{
+    background-color: rgba(41, 41, 41, 0.7);
+    margin-top: 10px;
+    margin-left: 0px;
     height: 25vh;
     border: none;
   }
@@ -457,7 +481,7 @@ padding-top: 0px;
   }
   
   /* 保证信息列和地图对齐 */
-  .col-12.col-md-2 {
+  .col-12.col-md-3 {
     display: flex;
     flex-direction: column;
     height: 60vh; /* 与地图框高度一致 */
@@ -577,6 +601,40 @@ border: none;
 .event {
   margin-left: 10px;
 }
+
+.operation-panel {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #FFFFFF;
+  padding: 10px;
+  border: 1px solid #FFFFFF;
+  max-height: 150px; /* 控制高度 */
+  overflow-y: auto; /* 启用垂直滚动条 */
+  font-family: monospace;
+}
+.operation-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.operation-panel::-webkit-scrollbar-thumb {
+  background-color: #a0a0a0; /* 滚动条滑块颜色 */
+  border-radius: 4px; /* 圆角 */
+}
+
+.operation-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #ccae00; /* 鼠标悬停时变为金黄色 */
+}
+
+.operation-panel::-webkit-scrollbar-track {
+  background-color: #343434; /* 滚动条轨道背景色 */
+}
+.operation-panel::-webkit-scrollbar-thumb {
+  transition: background-color 0.3s;
+}
+.operation-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
 .selection-card {
   background-color: rgba(107, 107, 107, 0.2);
   color: white;
@@ -621,7 +679,7 @@ border: none;
     padding-left: 0px;
     margin-right: 0px;
     display: flex;
-  height: 69vh;
+  height: 66vh;
 }
 .data-table {
    margin: 0; /* 移除表格的外边距 */
@@ -665,6 +723,97 @@ border: none;
 #temperature-chart {
   display: inline-block; /* 确保 div 不影响表格对齐 */
   vertical-align: bottom; /* 保证图表底部对齐 */
+}
+.image-box {
+  text-align: center;
+  margin: 0px auto;
+}
+
+.image-box img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.image-item {
+    width: 100%;
+    height: 17vh;
+    overflow: hidden;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+}
+
+.image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.row {
+  display: flex;
+  align-items: flex-start; /* 确保左侧文字顶部对齐 */
+}
+
+/* 左侧竖排文字样式 */
+.vertical-text {
+  writing-mode: vertical-rl; /* 垂直从右到左 */
+  text-orientation: upright; /* 字体方向直立 */
+  font-size: 16px;
+  color:gold; /* 自定义文字颜色 */
+  line-height: 1.5; /* 控制文字间距 */
+  text-align: left;
+  padding-left: 0; /* 去掉多余的内边距 */
+  margin: 0; /* 去掉外边距 */
+  margin-top: 50px;
+  font-weight: bold;
+}
+.image-target {
+  text-align: center;
+  margin: 0px auto;
+}
+
+.image-target img {
+  max-width: 27vw;
+  height: 25vh;
+  border-radius: 8px;
+}
+.result-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.result-row {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.result-label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.result-value {
+  font-weight: bold;
+    color: #ffcc00; /* 突出显示的结果颜色 */
+}
+.image-maturity {
+  text-align: center;
+  margin: 0px auto;
+}
+
+.image-maturity img {
+  max-width: 27vw;
+  height: 26.5vh;
+  border-radius: 8px;
 }
   </style>
   
