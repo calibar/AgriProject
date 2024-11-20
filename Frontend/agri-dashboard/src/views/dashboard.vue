@@ -92,7 +92,7 @@
             </div>
           </div>
           <div class="col-auto">
-            <button type="submit" class="btn btn-light btn-sm w-100">提交</button> <!-- 设置 w-100 使按钮充满宽度 -->
+            <button type="submit" class="btn btn-outline-light btn-sm w-100">提交</button> <!-- 设置 w-100 使按钮充满宽度 -->
           </div>
         </div>
       </form>
@@ -640,7 +640,7 @@ import SmoothLineChart from '../components/SmoothLineChart.vue';
   <style scoped>
   /* Flexbox centering for #app */
   html, body, #app {
-    background-image: url('../assets/blue.jpg');
+    background-image: url('../assets/blue5.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

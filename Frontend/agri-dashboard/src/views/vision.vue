@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-      <HeaderBar title="有害气体浓度类传感器数据优化"></HeaderBar>
+      <HeaderBar title="视觉类传感器数据增强"></HeaderBar>
       <div class="container-fluid">
         <div class="row ">
         <div class="col-12 col-md-4">
@@ -73,7 +73,7 @@
         <div class="row mb-2">
           <div class="col">
             <div class="input-group input-group-sm">
-              <span class="input-group-text">优化算法</span>
+              <span class="input-group-text">增强算法</span>
               <select v-model="selectedOptimizationAlgorithm" id="optimization" class="form-select form-select-sm">
                 <option v-for="(algo, index) in optimizationAlgorithms" :key="index" :value="algo">
                   {{ algo }}
@@ -83,7 +83,7 @@
           </div>
           <div class="col">
             <div class="input-group input-group-sm">
-              <span class="input-group-text">校准算法</span>
+              <span class="input-group-text">识别算法</span>
               <select v-model="selectedCalibrationAlgorithm" id="algorithm" class="form-select form-select-sm">
                 <option v-for="(algo, index) in calibrationAlgorithms" :key="index" :value="algo">
                   {{ algo }}
@@ -100,101 +100,36 @@
   </div>
         <div class="card result-card">
           <div class="card-header">
-            实时监测面板
+            目标检测
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-striped table-hover data-table">
-                <thead class="thead-dark">
-                <tr>
-                  <th></th>
-                  <th>湿度</th>
-                  <th>温度</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="text-align: left;font-size: 14px; color: #f3c429;font-weight: bold;">环境参数</td>
-                  <td><div id="humidity-chart" style="width: 11vh; height: 11vh;"></div></td>
-                  <td><div id="temperature-chart" style="width: 11vh; height: 11vh;"></div></td>
-                </tr>
-              </tbody>
-              </table>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-striped table-hover data-table">
-                <thead class="thead-dark">
-                <tr>
-                  <th style="text-align: left;font-size: 14px; color: #f3c429;font-weight: bold;">有害气体浓度</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="padding: 0%;">
-                    <!-- 饼图 -->
-                    <div id="pie-chart" style="width: 100%; height: 20vh; margin: auto;"></div>
-                    <!-- 折线图 -->
-                    <div id="line-chart" style="width: 100%; height: 20vh; margin: auto; margin-top: 10px;"></div>
-                  </td>
-                </tr>
-              </tbody>
-              </table>
-            </div>
+
             </div>
         </div>
         </div>
 
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-5">
           <!-- 将地图放入 card 中，去掉 header，只显示地图 -->
           <div class="card custom-card">
             <div class="card-header">
-              气体传感器分布地图
+              实时监测面板
             </div>
             <div class="card-body p-0"> <!-- 去掉卡片内边距 -->
-              <div id="map" ref="map" style="width: 100%; height: 60vh;"></div> <!-- 设置地图的高度 -->
+
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-2">
+        <div class="col-12 col-md-3">
           <div class="card gas-info-card">
-      <div class="card-header">氨气浓度排名</div>
+      <div class="card-header">增强效果</div>
       <div class="card-body p-0">
-                  <div v-for="(item, index) in AnGas" :key="index" class="info-item">
-                    <label>TOP {{index+1}}:</label>
-                    <span>{{ item.name }}</span>
-                  </div>
           </div>
     </div>
           <div class="card info-card">
-    <div class="card-header">当前位置</div>
+    <div class="card-header">用户操作记录</div>
     <div class="card-body p-0">
-      <div class="info-item">
-        <label>经度：</label>
-        <span>{{ clickedCoords.lon }}</span>
-      </div>
-      <div class="info-item">
-        <label>纬度：</label>
-        <span>{{ clickedCoords.lat }}</span>
-      </div>
-      <div class="info-item">
-        <label>所属省市：</label>
-        <span>{{ locationDetails.province }}</span>
-      </div>
-      <div class="info-item">
-        <label>县、乡镇：</label>
-        <span>{{ locationDetails.town }}</span>
-      </div>
     </div>
   </div>
-  <div class="card gas-info-card">
-      <div class="card-header">当前场景气体浓度排名</div>
-      <div class="card-body p-0">
-                  <div v-for="(item, index) in TopGasCurrent" :key="index" class="info-item">
-                    <label>TOP {{index+1}}:</label>
-                    <span>{{ item.name }}</span>
-                  </div>
-          </div>
-    </div>
         </div>
           <!-- 新增红框区域，4，4 布局 -->
   <div class="row mt-3">
@@ -277,23 +212,10 @@
   
   <script>
   import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import { OSM } from 'ol/source';
-  import TileLayer from 'ol/layer/Tile';
-  import VectorLayer from 'ol/layer/Vector';
-  import VectorSource from 'ol/source/Vector';
-  import { Point } from 'ol/geom';
-  import { Feature } from 'ol';
-  import { Style, Icon, Text, Fill, Stroke } from 'ol/style';
-  import { fromLonLat } from 'ol/proj';
-  import Overlay from 'ol/Overlay';
 import HeaderBar from '@/components/HeaderBar.vue';
-import { toLonLat } from 'ol/proj';
 import apiService from '@/services/apiService';
-import * as echarts from "echarts";
   export default {
-    name: 'GasPage',
+    name: 'VisionPage',
     components: {
       HeaderBar, // 注册标题栏组件
     },
@@ -317,56 +239,7 @@ import * as echarts from "echarts";
       selectedCalibrationAlgorithm:'算法B',
       startTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '', 
       endTime: this.getFormattedDate ? this.getFormattedDate(new Date()) : '' ,
-            // 饼图数据
-            pieData: [
-        { value: 35, name: "气体" },
-        { value: 25, name: "碳化物" },
-        { value: 15, name: "甲烷" },
-        { value: 10, name: "氮化物" },
-        { value: 10, name: "PM10" },
-        { value: 5, name: "其他" },
-      ],
-      // 折线图数据
-      lineSeries: [
-        {
-          name: "气体",
-          type: "line",
-          data: [50, 60, 55, 70, 65, 80],
-          smooth: true,
-        },
-        {
-          name: "碳化物",
-          type: "line",
-          data: [40, 45, 50, 48, 55, 60],
-          smooth: true,
-        },
-        {
-          name: "甲烷",
-          type: "line",
-          data: [20, 25, 23, 30, 28, 35],
-          smooth: true,
-        },
-        {
-          name: "氮化物",
-          type: "line",
-          data: [10, 12, 15, 14, 18, 20],
-          smooth: true,
-        },
-        {
-          name: "PM10",
-          type: "line",
-          data: [30, 32, 35, 38, 40, 42],
-          smooth: true,
-        },
-        {
-          name: "其他",
-          type: "line",
-          data: [5, 6, 7, 6, 8, 10],
-          smooth: true,
-        },
-      ],
-      // 折线图的横轴数据
-      lineXAxisData: ["2019", "2020", "2021", "2022", "2023", "2024"],
+
         logs: [
         { timestamp: '2024-10-10 12:23:25', event: '空气湿度含量过高，及时处理' },
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
@@ -379,34 +252,6 @@ import * as echarts from "echarts";
         { timestamp: '2024-10-10 12:23:25', event: '氨气浓度过高，及时通风' },
         // 可以添加更多的日志条目
       ],
-        AnGas:[
-        {name:'武汉养鸡场'},
-          {name:'合肥养鸡场'},
-          {name:'菏泽养鸡场'},
-          {name:'廊坊养鸡场'},
-          {name:'大庆养鸡场'}
-        ],
-        TopGasCurrent:[
-          {name:'甲烷'},
-          {name:'PM10'},
-          {name:'硫化氢'}
-        ],
-        points: [
-          { id: 1, name: '廊坊养鸡场', coords: [116.6838, 39.5296], description: '廊坊养鸡场' },
-          { id: 2, name: '武汉养鸡场', coords: [114.3054, 30.5931], description: '武汉养鸡场' },
-          { id: 3, name: '菏泽养鸡场', coords: [115.4812, 35.2336], description: '菏泽养鸡场' },
-          { id: 4, name: '大庆养鸡场', coords: [125.1031, 46.5876], description: '大庆养鸡场' },
-          { id: 5, name: '合肥养鸡场', coords: [117.2290, 31.8206], description: '合肥养鸡场' }
-        ],
-        initialCenter: null,
-        clickedCoords: {
-      lon: '暂无数据',
-      lat: '暂无数据'
-    },
-    locationDetails: {
-      province: '暂无数据',
-      town: '暂无数据'
-    },
     dataList: [
           // Add more items as needed
         ],
@@ -415,16 +260,7 @@ import * as echarts from "echarts";
       };
     },
     mounted() {
-      this.initMap();
-      if (this.points.length > 0) {
-        this.clickedCoords.lon = this.points[0].coords[0].toFixed(4);
-        this.clickedCoords.lat = this.points[0].coords[1].toFixed(4);
-        this.fetchLocationDetails(this.points[0].coords);
-      } 
-      this.renderHumidityChart();
-      this.renderTemperatureChart();
-      this.renderPieChart();
-      this.renderLineChart();
+
     },
     async created() {
     try {
@@ -475,204 +311,6 @@ import * as echarts from "echarts";
   }
     },
     methods: {
-    // 饼图
-    renderPieChart() {
-      const chartDom = document.getElementById("pie-chart");
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {
-          text: "污染物比例分布",
-          left: "center",
-          textStyle: {
-            fontSize: 14, // 调小标题文字
-            color: "#FFFFFF",
-          },
-        },
-        tooltip: {
-          trigger: "item",
-        },
-        legend: {
-          top: "bottom",
-          textStyle: {
-            fontSize: 8, // 调小图例字体
-            color: "#FFFFFF",
-          },
-        },
-        series: [
-          {
-            name: "污染物",
-            type: "pie",
-            radius: "50%",
-            data: this.pieData,
-            label: {
-              fontSize: 8, // 调小标签文字
-              color: "#FFFFFF",
-            },
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: "rgba(0, 0, 0, 0.5)",
-              },
-            },
-          },
-        ],
-      };
-      myChart.setOption(option);
-    },
-    // 折线图
-    renderLineChart() {
-      const chartDom = document.getElementById("line-chart");
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {
-          text: "污染物趋势分析",
-          left: "center",
-          textStyle: {
-            fontSize: 15, // 调小标题文字
-            color: "#FFFFFF",
-          },
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          top: 20, // 图例距离顶部的距离
-          textStyle: {
-            fontSize: 8, // 调小图例字体
-            color: "#FFFFFF",
-          },
-          itemGap: 5,
-        },
-        grid: {
-          top: 50, // 调整图表内容距顶部的距离
-          bottom: 20, // 调整图表内容距底部的距离
-          left: 50,
-          right: 20,
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: this.lineXAxisData,
-          axisLabel: {
-            fontSize: 8, // 调小横轴标签
-            color: "#FFFFFF",
-          },
-        },
-        yAxis: {
-          type: "value",
-          axisLabel: {
-            fontSize: 8, // 调小纵轴标签
-            color: "#FFFFFF",
-          },
-        },
-        series: this.lineSeries,
-        color: ["#5470C6", "#91CC75", "#EE6666", "#FAC858", "#73C0DE", "#3BA272"],
-      };
-      myChart.setOption(option);
-    },
-    renderHumidityChart() {
-    const chartDom = document.getElementById("humidity-chart");
-    const myChart = echarts.init(chartDom);
-    const option = {
-      tooltip: {
-        formatter: "{a} <br/>{b} : {c}%",
-      },
-      series: [
-        {
-          name: "湿度",
-          type: "gauge",
-          radius: "90%",
-          splitNumber: 5, // 调整主刻度数量，减少刻度密度
-          axisLine: {
-            lineStyle: {
-              width: 10,
-              color: [[0.5, "#58D9F9"], [1, "#C12E34"]],
-            },
-          },
-          axisLabel: {
-            show:false
-          },
-          axisTick: {
-            splitNumber: 2, // 每两个主刻度间显示一个小刻度
-            length: 6, // 小刻度长度
-            lineStyle: {
-              color: "#FFFFFF",
-            },
-          },
-          splitLine: {
-            length: 10, // 主刻度分割线长度
-            lineStyle: {
-              color: "#FFFFFF",
-              width: 2,
-            },
-          },
-          pointer: {
-            width: 5,
-          },
-          detail: {
-            formatter: "{value}%",
-            fontSize: 14,
-            color: "#FFFFFF",
-          },
-          data: [{ value: 50}],
-        },
-      ],
-    };
-    myChart.setOption(option);
-  },
-  renderTemperatureChart() {
-    const chartDom = document.getElementById("temperature-chart");
-    const myChart = echarts.init(chartDom);
-    const option = {
-      tooltip: {
-        formatter: "{a} <br/>{b} : {c}°C",
-      },
-      series: [
-        {
-          name: "温度",
-          type: "gauge",
-          //startAngle: 180,
-          //endAngle: 0,
-          radius: "90%",
-          splitNumber: 5, // 调整主刻度数量
-          axisLine: {
-            lineStyle: {
-              width: 10,
-              color: [[0.3, "#FFAB91"], [1, "#FF5722"]],
-            },
-          },
-          axisLabel: {
-           show:false
-          },
-          axisTick: {
-            splitNumber: 2, // 每两个主刻度间显示一个小刻度
-            length: 6, // 小刻度长度
-            lineStyle: {
-              color: "#FFFFFF",
-            },
-          },
-          splitLine: {
-            length: 10, // 主刻度分割线长度
-            lineStyle: {
-              color: "#FFFFFF",
-              width: 2,
-            },
-          },
-          pointer: {
-            width: 5,
-          },
-          detail: {
-            formatter: "{value}°C",
-            fontSize: 14,
-            color: "#FFFFFF",
-          },
-          data: [{ value: 24.12 }],
-        },
-      ],
-    };
-    myChart.setOption(option);
-  },
       getFormattedDate(date) {
       // 格式化日期为 YYYY-MM-DDTHH:MM 格式
       const year = date.getFullYear();
@@ -693,98 +331,7 @@ import * as echarts from "echarts";
   prevPage() {
     if (this.currentPage > 1) this.currentPage--;
   },
-  async fetchLocationDetails(coords) {
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords[1]}&lon=${coords[0]}&format=json&addressdetails=1&accept-language=zh`);
-      const data = await response.json();
-      const address = data.address;
-      this.locationDetails.province = address.state || '未知';
-      this.locationDetails.town = address.village || address.town || address.city || '未知';
-    } catch (error) {
-      console.error('Error fetching location details:', error);
-      this.locationDetails.province = '未知';
-      this.locationDetails.town = '未知';
-    }
-  },
-      async initMap() {
-        // Create the map
-        if (this.points.length > 0) {
-      this.initialCenter = this.points[0].coords;
-    }
-    const darkMapLayer = new TileLayer({
-      source: new OSM({
-        url: 'https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      })
-    });
-    // Create the map
-    this.map = new Map({
-      target: this.$refs.map,
-      layers:  [darkMapLayer],
-      view: new View({
-        center: fromLonLat(this.initialCenter),
-        zoom: 5, // 可以根据需要调整初始缩放级别
-      }),
-    });
-  
-        // Create a vector source and layer for the points
-        const vectorSource = new VectorSource();
-        const vectorLayer = new VectorLayer({
-          source: vectorSource,
-          style: this.pointStyle,
-        });
-        this.map.addLayer(vectorLayer);
-  
-        // Create overlay for popup
-        this.overlay = new Overlay({
-          element: this.$refs.popup,
-          positioning: 'bottom-center',
-          stopEvent: true,
-          offset: [0, -15],
-        });
-        this.map.addOverlay(this.overlay);
-  
-        // Add points to the map
-        this.points.forEach((point) => {
-          const feature = new Feature({
-            geometry: new Point(fromLonLat(point.coords)),
-            name: point.name,
-            description: point.description,
-          });
-          vectorSource.addFeature(feature);
-        });
 
-        // Add click event to display point details
-        this.map.on('singleclick', (event) => {
-          this.overlay.setPosition(undefined); // Hide any open popup
-          const coords = toLonLat(event.coordinate);
-          this.clickedCoords.lon = coords[0].toFixed(4);
-          this.clickedCoords.lat = coords[1].toFixed(4);
-       // Fetch location details using Nominatim or other reverse geocoding service
-       this.fetchLocationDetails(coords);
-          this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
-            const coordinates = feature.getGeometry().getCoordinates();
-            const description = feature.get('description');
-            const name = feature.get('name');
-            this.$refs.popupContent.innerHTML = `<strong>${name}</strong><br>${description}`;
-            this.overlay.setPosition(coordinates);
-          });
-        });
-      },
-      pointStyle(feature) {
-        return new Style({
-          image: new Icon({
-            src: '/pics/yellowdot.png',
-            scale: 0.5,
-          }),
-          text: new Text({
-            text: feature.get('name'),
-            offsetY: -30,
-            font: 'bold 14px Arial',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 3 }),
-          }),
-        });
-      },
       closePopup() {
         this.overlay.setPosition(undefined); // Hide the popup
       },

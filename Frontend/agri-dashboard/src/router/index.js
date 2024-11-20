@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../views/Home.vue'
 import DashboardPage from '@/views/dashboard.vue';
-import GasPage from '@/views/gas.vue'
+import GasPage from '@/views/gas.vue';
+import VisionPage from '@/views/vision.vue';
 
 const routes = [
   { path: '/', name: 'Home', component: HomePage  },
   { path: '/dashboard', name: 'Dashboard', component:DashboardPage,meta: { requiresAuth: true }  },
-  { path: '/gas', name: 'Gas', component: GasPage,meta: { requiresAuth: true }  }
+  { path: '/gas', name: 'Gas', component: GasPage,meta: { requiresAuth: true }  },
+  { path: '/vision', name: 'Vision', component: VisionPage,meta: { requiresAuth: true }  },
 ];
 
 const router = createRouter({

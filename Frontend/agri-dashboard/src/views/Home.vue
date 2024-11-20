@@ -171,7 +171,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top:0px;
-  background-image: url('../assets/blue.jpg');
+  background-image: url('../assets/blue5.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
